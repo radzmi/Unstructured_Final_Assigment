@@ -2,8 +2,6 @@
 
 This is final assignment for unstructured data learning
 
-adding segmentation (in progress) and morphological operations
+segmentation, histogram and morphological are completed
 
-need to continue with segmentation and graph
-
-I donwload this from github to local (laptop)
+i uploaded the three above seperately just for fun
