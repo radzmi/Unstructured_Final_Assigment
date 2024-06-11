@@ -3,38 +3,38 @@ library(imager)
 
 # Load Image
 # Flower Image
-flower1 <- load.image("/Users/PC 8/Documents/Image/flower1.jpg")
+flower1 <- load.image("/Users/Radzmi Shah/Documents/UKM/Unstructured data/Assignment/Image/flower1.jpg")
 plot(flower1)
 
-flower2 <- load.image("/Users/PC 8/Documents/Image/flower2.jpg")
+flower2 <- load.image("/Users/Radzmi Shah/Documents/UKM/Unstructured data/Assignment/Image/flower2.jpg")
 plot(flower2)
 
 # Scenery Image
-scenery1 <- load.image("/Users/PC 8/Documents/Image/scenery1.jpg")
+scenery1 <- load.image("/Users/Radzmi Shah/Documents/UKM/Unstructured data/Assignment/Image/scenery1.jpg")
 plot(scenery1)
 
-scenery2 <- load.image("/Users/PC 8/Documents/Image/scenery2.jpg")
+scenery2 <- load.image("/Users/Radzmi Shah/Documents/UKM/Unstructured data/Assignment/Image/scenery2.jpg")
 plot(scenery2)
 
 # Person Image
-person1 <- load.image("/Users/PC 8/Documents/Image/person1.jpg")
+person1 <- load.image("/Users/Radzmi Shah/Documents/UKM/Unstructured data/Assignment/Image/person1.jpg")
 plot(person1)
 
-person2 <- load.image("/Users/PC 8/Documents/Image/person2.jpg")
+person2 <- load.image("/Users/Radzmi Shah/Documents/UKM/Unstructured data/Assignment/Image/person2.jpg")
 plot(person2)
 
 # Building Image
-building1 <- load.image("/Users/PC 8/Documents/Image/building1.jpg")
+building1 <- load.image("/Users/Radzmi Shah/Documents/UKM/Unstructured data/Assignment/Image/building1.jpg")
 plot(building1)
 
-building2 <- load.image("/Users/PC 8/Documents/Image/building2.jpg")
+building2 <- load.image("/Users/Radzmi Shah/Documents/UKM/Unstructured data/Assignment/Image/building2.jpg")
 plot(building2)
 
 # Other Image
-cat1 <- load.image("/Users/PC 8/Documents/Image/cat1.jpg")
+cat1 <- load.image("/Users/Radzmi Shah/Documents/UKM/Unstructured data/Assignment/Image/cat1.jpg")
 plot(cat1)
 
-cat2 <- load.image("/Users/PC 8/Documents/Image/cat2.jpg")
+cat2 <- load.image("/Users/Radzmi Shah/Documents/UKM/Unstructured data/Assignment/Image/cat2.jpg")
 plot(cat2)
 
 # Edge Detection
@@ -155,45 +155,59 @@ highlight(out2,col="green")
 
 # Histogram Equalization
 
+grayscale(flower1) %>% hist(main="Luminance values in flower1 picture")
 
+R(flower1) %>% hist(main="Red channel values in flower1 picture")
 
+library(ggplot2)
+library(dplyr)
+bdf <- as.data.frame(flower1)
+head(bdf,3)
 
+bdf <- mutate(bdf,channel=factor(cc,labels=c('R','G','B')))
+ggplot(bdf,aes(value,col=channel))+geom_histogram(bins=30)+facet_wrap(~ channel)
 
+x <- rnorm(100)
+layout(t(1:2))
+hist(x,main="Histogram of x")
+f <- ecdf(x)
+hist(f(x),main="Histogram of ecdf(x)")
 
+flower1.g <- grayscale(flower1)
+f <- ecdf(flower1.g)
+plot(f,main="Empirical CDF of luminance values")
 
+f(flower1.g) %>% hist(main="Transformed luminance values")
 
+f(flower1.g) %>% str
 
+f(flower1.g) %>% as.cimg(dim=dim(flower1.g)) %>% 
+  plot(main="With histogram equalisation")
 
+#Hist. equalisation for grayscale
+hist.eq <- function(im) as.cimg(ecdf(im)(im),dim=dim(im))
 
+#Split across colour channels,
+cn <- imsplit(flower1,"c")
+cn #we now have a list of images
 
+cn.eq <- map_il(cn,hist.eq) #run hist.eq on each
+imappend(cn.eq,"c") %>% plot(main="All channels equalised") #recombine and plot
 
+library(purrr)
+#Convert to HSV, reduce saturation, convert back
+RGBtoHSV(flower1) %>% imsplit("c") %>%
+  modify_at(2,~ . / 2) %>% imappend("c") %>%
+  HSVtoRGB %>% plot(rescale=FALSE)
 
+#Turn into a function
+desat <- function(im) RGBtoHSV(im) %>% imsplit("c") %>%
+  modify_at(2,~ . / 2) %>% imappend("c") %>%
+  HSVtoRGB
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#Split image into 3 blocks, reduce saturation in middle block, recombine
+imsplit(flower1,"x",3) %>% modify_at(2,desat) %>%
+  imappend("x") %>% plot(rescale=FALSE)
 
 # Morphological Operations
 # Change colour to grayscale
